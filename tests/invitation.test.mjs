@@ -1,0 +1,12 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {access} from 'node:fs/promises';
+import {calendarCells,calendarURL,escapeHTML} from '../src/lib.js';
+import {invitationData as d} from '../src/data.js';
+import {guestbookStore} from '../src/guestbook-store.js';
+import {wrapIndex} from '../src/components/gallery.js';
+test('calendar starts Monday and handles leap years',()=>{assert.deepEqual(calendarCells('2026-04-07').cells.slice(0,4),[null,null,1,2]);assert.equal(calendarCells('2024-02-29').cells.filter(Boolean).length,29);});
+test('calendar uses Vietnam timezone and reception end time',()=>{const url=new URL(calendarURL());assert.equal(url.searchParams.get('ctz'),'Asia/Ho_Chi_Minh');assert.equal(url.searchParams.get('dates'),'20261018T180000/20261018T203000');});
+test('gallery wraps in both directions',()=>{assert.equal(wrapIndex(-1,12),11);assert.equal(wrapIndex(12,12),0);});
+test('all configured local media exists',async()=>{const paths=[d.hero.src,...d.gallery.flatMap(p=>[p.src,p.thumbnailSrc]),...Object.values(d.decorations),...d.gifts.map(g=>g.qrSrc),d.music.src];for(const path of paths)await access(path.startsWith('/')?'.'+path:path);});
+test('guestbook validates, persists and safely renders user text',async()=>{const memory=new Map();globalThis.localStorage={getItem:k=>memory.get(k)||null,setItem:(k,v)=>memory.set(k,v)};await assert.rejects(()=>guestbookStore.add({name:' ',message:'hello'}));await guestbookStore.add({name:' Guest ',message:'<script>alert(1)</script>'});const rows=await guestbookStore.list();assert.equal(rows[0].name,'Guest');assert.match(escapeHTML(rows[0].message),/^&lt;script&gt;/);memory.set('romantic-invitation-guestbook-v1','broken');assert.equal((await guestbookStore.list()).length,d.guestbookSeed.length);});
