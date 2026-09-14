@@ -34,3 +34,22 @@
   font-feature-settings:normal;
   letter-spacing:normal;
 }
+
+/* Keep the original wedding photos completely visible within their frames. */
+.hero-photo img,.gallery-photo img,.thumbnails img{object-fit:contain}
+
+/* Crop only surplus screenshot background, retaining the complete bank card, name and account details. */
+.gift-accounts{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;padding:24px 16px}
+.gift-accounts article{min-width:0;padding:12px 8px;border-radius:12px;background:transparent}
+
+.qr-image{display:block;position:relative;width:100%;max-width:250px;aspect-ratio:3/4;padding:0;overflow:hidden;border:0;border-radius:8px;background:white}
+
+.qr-image img{position:absolute;max-width:none;height:auto;object-fit:initial}
+.gift-accounts [data-gift="groom"] .qr-image img{width:126.1333%;left:-13.3333%;top:-28%}
+.gift-accounts [data-gift="bride"] .qr-image img{width:122.8125%;left:-11.4583%;top:-34.375%}
+.gift-accounts .account-number{overflow-wrap:anywhere}
+.gift-accounts .outline-button{min-height:44px;padding:8px}
+@media(max-width:600px){.gift-accounts{gap:10px;padding:16px 10px}.gift-accounts article{padding:10px 5px}.gift-accounts h3{font-size:17px}.gift-accounts .account-holder{font-size:10px}.qr-image{margin-bottom:12px;border-width:0}.gift-accounts .outline-button{font-size:11px}}
+
+.guestbook-messages{margin-top:32px}.guestbook-messages:empty{display:none}
+

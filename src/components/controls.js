@@ -1,4 +1,4 @@
-import {invitationData as d,motion} from '../data.js';
+import {invitationData as d} from '../data.js';
 import {icon} from '../lib.js';
 export function FloatingControls(){return `<aside class="floating-controls" id="floating-controls" aria-label="Điều khiển thiệp" hidden><button class="icon-button" id="scroll-toggle" aria-label="Bật tự động cuộn" aria-pressed="false">${icon('down')}</button><button class="icon-button" id="music-toggle" aria-label="Phát nhạc" aria-pressed="false">${icon('muted')}</button><span id="music-status" class="control-status" role="status"></span></aside>`;}
 export function updateScrollButton(value){const button=document.querySelector('#scroll-toggle');button.innerHTML=icon(value?'pause':'down');button.setAttribute('aria-pressed',String(value));button.setAttribute('aria-label',value?'Dừng tự động cuộn':'Bật tự động cuộn');}

@@ -7,6 +7,6 @@ export function InvitationCover(){
  ${floral('cover-flower left')}${floral('cover-flower right')}
  <div class="cover-copy"><h1>${e(d.couple.groom)}<small>&</small>${e(d.couple.bride)}</h1><div class="ornament">❦</div>
  <p class="cover-date">${date.day} tháng ${date.month}, ${date.year}</p><p class="salutation">Thân Mời</p><p class="guest-name">${e(d.guestName)}</p><p class="invitation-message">Đến dự buổi tiệc chung vui cùng gia đình</p>
- <button class="primary open-button" id="open-invitation">Mở thiệp <span aria-hidden="true">↗</span></button></div>
+ <button class="primary open-button" id="open-invitation">Mở thiệp</button></div>
  </div><span class="cover-footnote">TRÂN TRỌNG KÍNH MỜI</span></section>`;
 }
