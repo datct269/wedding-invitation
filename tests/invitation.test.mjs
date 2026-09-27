@@ -27,8 +27,8 @@ test('guest name comes safely from the to query parameter with a fallback',()=>{
 test('social preview metadata is static and uses the GitHub Pages URL',async()=>{
   const html=await readFile('index.html','utf8');
   for(const tag of ['og:title','og:description','og:image','og:url','og:type','twitter:card','twitter:title','twitter:description','twitter:image'])assert.match(html,new RegExp(`["']${tag}["']`));
-  assert.match(html,/https:\/\/datct269\.github\.io\/wedding-invitation\/public\/images\/og-preview\.jpg/);
-  await access('public/images/og-preview.jpg');
+  assert.match(html,/https:\/\/datct269\.github\.io\/wedding-invitation\/public\/images\/og-preview\.png/);
+  await access('public/images/og-preview.png');
 });
 test('bride family address uses TP Bắc Ninh',()=>{assert.match(d.families[1].address,/TP Bắc Ninh$/);assert.doesNotMatch(d.families[1].address,/Tỉnh Bắc Ninh/);});
 test('all configured local media exists',async()=>{const paths=[d.hero.src,...d.gallery.flatMap(p=>[p.src,p.lightboxSrc,p.thumbnailSrc]),...Object.values(d.decorations),...d.gifts.map(g=>g.qrSrc),d.music.src];for(const path of paths)await access(path.startsWith('/')?'.'+path:path);});
