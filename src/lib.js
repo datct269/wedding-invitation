@@ -1,5 +1,6 @@
 import { invitationData as data } from './data.js';
 export const escapeHTML = value => String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+export const guestNameFromSearch = (search, fallback=data.guestName) => new URLSearchParams(search).get('to')?.trim() || fallback;
 export const image = (src,alt='',cls='',loading='lazy',position='center') => `<img src="${escapeHTML(src)}" alt="${escapeHTML(alt)}" class="${cls}" draggable="false" loading="${loading}" decoding="async" style="object-position:${escapeHTML(position)}">`;
 export const floral = (cls='') => image(data.decorations.floral,'',`floral ${cls}`);
 export function installImageFallbacks(root=document) {

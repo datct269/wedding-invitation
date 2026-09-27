@@ -6,7 +6,7 @@ import {Guestbook,mountGuestbook} from './components/guestbook.js';
 import {GiftSection,GiftModal,mountGift} from './components/gifts.js';
 import {FloatingControls,mountControls,updateScrollButton} from './components/controls.js';
 import {AutoScroll} from './scroll.js';
-import {installImageFallbacks} from './lib.js';
+import {guestNameFromSearch,installImageFallbacks} from './lib.js';
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const style=document.documentElement.style;
 for(const [key,value] of Object.entries({sealPulse:motion.sealPulse,sealGlow:motion.sealGlow,sealBreak:motion.sealBreak,floralReveal:motion.floralReveal,opening:motion.opening,galleryTransition:motion.galleryTransition,dotTransition:motion.dotTransition,overlay:motion.overlay}))style.setProperty('--'+key,value+'ms');
@@ -15,6 +15,7 @@ style.setProperty('--float-distance',motion.floatDistance+'px');motion.floatDura
 style.setProperty('--contentReveal',motion.contentReveal+'ms');style.setProperty('--coverFade',motion.coverFade+'ms');style.setProperty('--coverFadeDelay',Math.max(0,motion.opening-motion.coverFade)+'ms');
 const petals=`<div class="petal-layer" aria-hidden="true">${Array.from({length:motion.petals.count},(_,i)=>`<span style="--left:${3+i*8.3}%;--duration:${motion.petals.minDuration+(i%6)*(motion.petals.maxDuration-motion.petals.minDuration)/5}ms;--delay:-${i*1.8}s;--size:${7+(i%4)*3}px;--sway:${i%2?38:-28}px"></span>`).join('')}</div>`;
 document.querySelector('#app').innerHTML=`${InvitationCover()}<main id="invitation" class="invitation" hidden inert>${OpeningHero()}${WeddingCeremony()}${PhotoGallery()}${ReceptionInfo()}${VenueSection()}${Guestbook()}${GiftSection()}${Footer()}</main>${petals}${FloatingControls()}${PhotoLightbox()}${GiftModal()}`;
+document.querySelector('.guest-name').textContent=guestNameFromSearch(window.location.search);
 const scroll=new AutoScroll(updateScrollButton,reduced),music=mountControls(scroll);
 mountGallery(scroll,reduced);mountGuestbook(scroll);mountGift(scroll);installImageFallbacks();
 history.scrollRestoration='manual';window.scrollTo(0,0);

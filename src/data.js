@@ -5,7 +5,7 @@ export const invitationData = {
   event: { date: '2026-10-18', weekday: 'Chủ Nhật', ceremonyTime: '14:00', receptionTime: '10:00', endTime: '20:30', lunarDate: '09/09 năm Bính Ngọ', ceremonyVenue: 'Tư gia' },
   families: [
     { title: 'Nhà trai', mapQuery: '21.131066103159878,105.9095027585827', father: 'Chu Văn Phi', mother: 'Đinh Thị Thu', address: 'Xóm Đình Tràng, Thôn Đình Ngọc, Xã Thư Lâm, TP. Hà Nội' },
-    { title: 'Nhà gái', mapQuery: '21.15289342058316,105.94212620314183', father: 'Nguyễn Hữu Thủy', mother: 'Trương Thị Oanh', address: 'TDP Mai Động, Phường Phù Khê, Tỉnh Bắc Ninh' }
+    { title: 'Nhà gái', mapQuery: '21.15289342058316,105.94212620314183', father: 'Nguyễn Hữu Thủy', mother: 'Trương Thị Oanh', address: 'TDP Mai Động, Phường Phù Khê, TP Bắc Ninh' }
   ],
   hero: { src:'./public/images/wedding/originals/06.jpg',alt:'Ảnh cưới Chu Tiến Đạt và Nguyễn Huyền Dịu',position:'center' },
   gallery: [6,8,3,11,4,9,5,12,7,10,1,2].map(n=>({id:`photo-${String(n).padStart(2,'0')}`,src:`./public/images/wedding/originals/${String(n).padStart(2,'0')}.jpg`,thumbnailSrc:`./public/images/wedding/originals/${String(n).padStart(2,'0')}.jpg`,alt:`Ảnh a${n} của Tiến Đạt và Huyền Dịu`,position:'center'})),
