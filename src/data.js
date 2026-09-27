@@ -2,13 +2,17 @@
 export const invitationData = {
   couple: { groom: 'Tiến Đạt', bride: 'Huyền Dịu', groomFull: 'Chu Tiến Đạt', brideFull: 'Nguyễn Huyền Dịu' },
   guestName: 'Quý khách',
-  event: { date: '2026-10-18', weekday: 'Chủ Nhật', ceremonyTime: '14:00', receptionTime: '10:00', endTime: '20:30', lunarDate: '09/09 năm Bính Ngọ', ceremonyVenue: 'Tư gia' },
+  event: {
+    date: '2026-10-31',
+    ceremonyDate: '2026-10-31', ceremonyWeekday: 'Thứ Bảy', ceremonyLunarDate: '22/09 năm Bính Ngọ', ceremonyTime: '14:00', ceremonyVenue: 'Tư gia',
+    receptionDate: '2026-10-30', receptionWeekday: 'Thứ Sáu', receptionLunarDate: '21/09 năm Bính Ngọ', receptionTime: '10:00', endTime: '20:30'
+  },
   families: [
-    { title: 'Nhà trai', mapQuery: '21.131066103159878,105.9095027585827', father: 'Chu Văn Phi', mother: 'Đinh Thị Thu', address: 'Xóm Đình Tràng, Thôn Đình Ngọc, Xã Thư Lâm, TP. Hà Nội' },
+    { title: 'Nhà trai', mapQuery: '21.131066103159878,105.9095027585827', father: 'Chu Văn Phi', mother: 'Đinh Thị Thu', address: 'Thôn Đình Ngọc, Xã Thư Lâm, TP Hà Nội' },
     { title: 'Nhà gái', mapQuery: '21.15289342058316,105.94212620314183', father: 'Nguyễn Hữu Thủy', mother: 'Trương Thị Oanh', address: 'TDP Mai Động, Phường Phù Khê, TP Bắc Ninh' }
   ],
-  hero: { src:'./public/images/wedding/originals/06.jpg',alt:'Ảnh cưới Chu Tiến Đạt và Nguyễn Huyền Dịu',position:'center' },
-  gallery: [6,8,3,11,4,9,5,12,7,10,1,2].map(n=>({id:`photo-${String(n).padStart(2,'0')}`,src:`./public/images/wedding/originals/${String(n).padStart(2,'0')}.jpg`,thumbnailSrc:`./public/images/wedding/originals/${String(n).padStart(2,'0')}.jpg`,alt:`Ảnh a${n} của Tiến Đạt và Huyền Dịu`,position:'center'})),
+  hero: { src:'./public/images/wedding/optimized/06.jpg',alt:'Ảnh cưới Chu Tiến Đạt và Nguyễn Huyền Dịu',position:'center' },
+  gallery: [6,8,3,11,4,9,5,12,7,10,1,2].map(n=>{const file=String(n).padStart(2,'0');return {id:`photo-${file}`,src:`./public/images/wedding/optimized/${file}.jpg`,lightboxSrc:`./public/images/wedding/lightbox/${file}.jpg`,thumbnailSrc:`./public/images/wedding/thumbnails/${file}.jpg`,alt:`Ảnh a${n} của Tiến Đạt và Huyền Dịu`,position:'center'};}),
   decorations: { floral:'./public/images/decorations/floral.svg',paper:'./public/images/decorations/paper.svg',palace:'./public/images/decorations/palace.svg',fallback:'./public/images/wedding/originals/06.jpg' },
   gifts: [
     {id:'groom',role:'Mừng chú rể',bank:'MB Bank',holder:'CHU TIẾN ĐẠT',account:'333332692222',qrSrc:'./public/images/gift/groom-qr.jpg',placeholder:false},

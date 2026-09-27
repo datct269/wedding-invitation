@@ -1,6 +1,7 @@
 import { invitationData as data } from './data.js';
 export const escapeHTML = value => String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-export const guestNameFromSearch = (search, fallback=data.guestName) => new URLSearchParams(search).get('to')?.trim() || fallback;
+export const personalizedGuestName = search => new URLSearchParams(search).get('to')?.trim() || '';
+export const guestNameFromSearch = (search, fallback=data.guestName) => personalizedGuestName(search) || fallback;
 export const image = (src,alt='',cls='',loading='lazy',position='center') => `<img src="${escapeHTML(src)}" alt="${escapeHTML(alt)}" class="${cls}" draggable="false" loading="${loading}" decoding="async" style="object-position:${escapeHTML(position)}">`;
 export const floral = (cls='') => image(data.decorations.floral,'',`floral ${cls}`);
 export function installImageFallbacks(root=document) {
@@ -29,7 +30,7 @@ export function calendarCells(date) {
   return {year,month,day,cells:[...Array(start).fill(null),...Array.from({length:new Date(year,month,0).getDate()},(_,i)=>i+1)]};
 }
 export function calendarURL(d=data) {
-  const date=d.event.date.replaceAll('-','');
+  const date=d.event.receptionDate.replaceAll('-','');
   const params=new URLSearchParams({action:'TEMPLATE',text:`Đám cưới ${d.couple.groom} & ${d.couple.bride}`,dates:`${date}T${d.event.receptionTime.replace(':','')}00/${date}T${d.event.endTime.replace(':','')}00`,ctz:'Asia/Ho_Chi_Minh',location:d.families.map(f=>`${f.title}: ${f.address}`).join('; ')});
   return `https://calendar.google.com/calendar/render?${params}`;
 }
