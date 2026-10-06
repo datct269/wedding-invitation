@@ -49,8 +49,9 @@ test('guestbook receives only the verified invitation name and locks that field'
 });
 test('social preview metadata is static and uses the GitHub Pages URL',async()=>{
   const html=await readFile('index.html','utf8');
-  for(const tag of ['og:title','og:description','og:image','og:url','og:type','twitter:card','twitter:title','twitter:description','twitter:image'])assert.match(html,new RegExp(`["']${tag}["']`));
-  assert.match(html,/https:\/\/datct269\.github\.io\/wedding-invitation\/public\/images\/og-preview\.png/);
+  for(const tag of ['og:title','og:description','og:image','og:type','twitter:card','twitter:title','twitter:description','twitter:image'])assert.match(html,new RegExp(`["']${tag}["']`));
+  assert.doesNotMatch(html,/og:url/);
+  assert.match(html,/https:\/\/datct269\.github\.io\/wedding-invitation\/public\/images\/og-preview\.png\?v=2/);
   await access('public/images/og-preview.png');
 });
 test('bride family address uses TP Bắc Ninh',()=>{assert.match(d.families[1].address,/TP Bắc Ninh$/);assert.doesNotMatch(d.families[1].address,/Tỉnh Bắc Ninh/);});
