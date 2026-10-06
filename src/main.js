@@ -1,4 +1,4 @@
-import {invitationData as data,motion} from './data.js';
+import {invitationData as data,motion,invitationLookupUrl} from './data.js';
 import {InvitationCover} from './components/cover.js';
 import {OpeningHero,WeddingCeremony,ReceptionInfo,VenueSection,Footer} from './components/sections.js';
 import {PhotoGallery,PhotoLightbox,mountGallery} from './components/gallery.js';
@@ -6,7 +6,8 @@ import {Guestbook,mountGuestbook} from './components/guestbook.js';
 import {GiftSection,GiftModal,mountGift} from './components/gifts.js';
 import {FloatingControls,mountControls,updateScrollButton} from './components/controls.js';
 import {AutoScroll} from './scroll.js';
-import {guestNameFromSearch,installImageFallbacks} from './lib.js';
+import {installImageFallbacks} from './lib.js';
+import {resolveInvitation,defaultInvitation} from './invitation.js';
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const style=document.documentElement.style;
 for(const [key,value] of Object.entries({sealPulse:motion.sealPulse,sealGlow:motion.sealGlow,sealBreak:motion.sealBreak,floralReveal:motion.floralReveal,opening:motion.opening,galleryTransition:motion.galleryTransition,dotTransition:motion.dotTransition,overlay:motion.overlay}))style.setProperty('--'+key,value+'ms');
@@ -14,10 +15,15 @@ style.setProperty('--paper',`url("${data.decorations.paper}")`);style.setPropert
 style.setProperty('--float-distance',motion.floatDistance+'px');motion.floatDurations.forEach((value,i)=>style.setProperty('--float-'+i,value+'ms'));
 style.setProperty('--contentReveal',motion.contentReveal+'ms');style.setProperty('--coverFade',motion.coverFade+'ms');style.setProperty('--coverFadeDelay',Math.max(0,motion.opening-motion.coverFade)+'ms');
 const petals=`<div class="petal-layer" aria-hidden="true">${Array.from({length:motion.petals.count},(_,i)=>`<span style="--left:${3+i*8.3}%;--duration:${motion.petals.minDuration+(i%6)*(motion.petals.maxDuration-motion.petals.minDuration)/5}ms;--delay:-${i*1.8}s;--size:${7+(i%4)*3}px;--sway:${i%2?38:-28}px"></span>`).join('')}</div>`;
-document.querySelector('#app').innerHTML=`${InvitationCover()}<main id="invitation" class="invitation" hidden inert>${OpeningHero()}${WeddingCeremony()}${PhotoGallery()}${ReceptionInfo()}${VenueSection()}${Guestbook()}${GiftSection()}${Footer()}</main>${petals}${FloatingControls()}${PhotoLightbox()}${GiftModal()}`;
-document.querySelector('.guest-name').textContent=guestNameFromSearch(window.location.search);
+const localHost=['localhost','127.0.0.1'].includes(window.location.hostname);
+const lookupUrl=localHost?invitationLookupUrl.local:invitationLookupUrl.production;
+const selected=await resolveInvitation(window.location.search,lookupUrl);
+const brideSide=selected?.group==='Nhà gái';
+const invitation=selected?{...data,guestName:selected.name,couple:{...data.couple,groom:brideSide?data.couple.bride:data.couple.groom,bride:brideSide?data.couple.groom:data.couple.bride},event:{...data.event,...(selected.event==='2026-10-30T17:00'?{receptionDate:'2026-10-30',receptionWeekday:'Thứ Sáu',receptionLunarDate:'21/09 năm Bính Ngọ',receptionTime:'17:00'}:{receptionDate:'2026-10-31',receptionWeekday:'Thứ Bảy',receptionLunarDate:'22/09 năm Bính Ngọ',receptionTime:'10:00'})}}:defaultInvitation(data);
+document.querySelector('#app').innerHTML=`${InvitationCover(invitation)}<main id="invitation" class="invitation" hidden inert>${OpeningHero(invitation)}${WeddingCeremony()}${PhotoGallery()}${ReceptionInfo(invitation)}${VenueSection()}${Guestbook()}${GiftSection()}${Footer(invitation)}</main>${petals}${FloatingControls()}${PhotoLightbox()}${GiftModal()}`;
+document.querySelector('.guest-name').textContent=invitation.guestName;
 const scroll=new AutoScroll(updateScrollButton,reduced),music=mountControls(scroll);
-mountGallery(scroll,reduced);mountGuestbook(scroll);mountGift(scroll);installImageFallbacks();
+mountGallery(scroll,reduced);mountGuestbook(scroll,selected?.name||'');mountGift(scroll);installImageFallbacks();
 history.scrollRestoration='manual';window.scrollTo(0,0);
 let opened=false;
 document.querySelector('#open-invitation').onclick=()=>{

@@ -1,28 +1,51 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {access,readFile} from 'node:fs/promises';
-import {calendarCells,calendarURL,escapeHTML,guestNameFromSearch,personalizedGuestName} from '../src/lib.js';
+import {calendarCells,escapeHTML} from '../src/lib.js';
 import {invitationData as d} from '../src/data.js';
 import {guestbookStore} from '../src/guestbook-store.js';
+import {resolveInvitation,defaultInvitation} from '../src/invitation.js';
 import {wrapIndex} from '../src/components/gallery.js';
-import {ReceptionInfo,WeddingCeremony} from '../src/components/sections.js';
+import {OpeningHero,ReceptionInfo,WeddingCeremony,Footer} from '../src/components/sections.js';
+import {InvitationCover} from '../src/components/cover.js';
 test('calendar starts Monday and handles leap years',()=>{assert.deepEqual(calendarCells('2026-04-07').cells.slice(0,4),[null,null,1,2]);assert.equal(calendarCells('2024-02-29').cells.filter(Boolean).length,29);});
-test('calendar uses the reception date, Vietnam timezone and reception end time',()=>{const url=new URL(calendarURL());assert.equal(url.searchParams.get('ctz'),'Asia/Ho_Chi_Minh');assert.equal(url.searchParams.get('dates'),'20261030T100000/20261030T203000');});
-test('ceremony and reception dates match their lunar dates',()=>{assert.deepEqual({date:d.event.receptionDate,lunar:d.event.receptionLunarDate,weekday:d.event.receptionWeekday},{date:'2026-10-30',lunar:'21/09 năm Bính Ngọ',weekday:'Thứ Sáu'});assert.deepEqual({date:d.event.ceremonyDate,lunar:d.event.ceremonyLunarDate,weekday:d.event.ceremonyWeekday},{date:'2026-10-31',lunar:'22/09 năm Bính Ngọ',weekday:'Thứ Bảy'});});
+test('ceremony and reception dates match their lunar dates and confirmed times',()=>{assert.deepEqual({date:d.event.receptionDate,lunar:d.event.receptionLunarDate,weekday:d.event.receptionWeekday},{date:'2026-10-30',lunar:'21/09 năm Bính Ngọ',weekday:'Thứ Sáu'});assert.deepEqual({date:d.event.ceremonyDate,lunar:d.event.ceremonyLunarDate,weekday:d.event.ceremonyWeekday,time:d.event.ceremonyTime},{date:'2026-10-31',lunar:'22/09 năm Bính Ngọ',weekday:'Thứ Bảy',time:'13:30'});});
 test('ceremony and reception render their own dates',()=>{assert.match(WeddingCeremony(),/date-block"><b>31<\/b>/);assert.match(WeddingCeremony(),/22\/09 NĂM BÍNH NGỌ/);assert.match(ReceptionInfo(),/date-block"><b>30<\/b>/);assert.match(ReceptionInfo(),/21\/09 NĂM BÍNH NGỌ/);});
+test('wedding ceremony displays the updated 13:30 time',()=>{assert.match(WeddingCeremony(),/VÀO LÚC 13:30/);});
+test('wedding ceremony remains fixed while group controls the couple order and reception choice',()=>{
+ const ceremony=WeddingCeremony();
+ for(const [group,groom,bride] of [['Nhà trai','Tiến Đạt','Huyền Dịu'],['Nhà gái','Huyền Dịu','Tiến Đạt']]){
+  const invite={...d,guestName:'<script>Khách</script>',couple:{...d.couple,groom,bride}};
+  assert.equal(WeddingCeremony(),ceremony);
+  assert.match(InvitationCover(invite),new RegExp(`${groom}.*${bride}`));assert.match(InvitationCover(invite),/&lt;script&gt;Khách/);
+  assert.match(OpeningHero(invite),new RegExp(`${groom}.*${bride}`));assert.match(Footer(invite),new RegExp(`${groom}.*${bride}`));
+ }
+ const friday={...d,event:{...d.event,receptionDate:'2026-10-30',receptionWeekday:'Thứ Sáu',receptionLunarDate:'21/09 năm Bính Ngọ',receptionTime:'17:00'}};
+ const saturday={...d,event:{...d.event,receptionDate:'2026-10-31',receptionWeekday:'Thứ Bảy',receptionLunarDate:'22/09 năm Bính Ngọ',receptionTime:'10:00'}};
+ for(const [invite,date,time] of [[friday,'30 tháng 10, 2026','17:00'],[saturday,'31 tháng 10, 2026','10:00']]){
+  const cover=InvitationCover(invite);assert.match(cover,new RegExp(`cover-date">${date}`));assert.match(cover,new RegExp(`cover-time">${time}`));
+ }
+ for(const [invite,day,weekday,lunar,time] of [[friday,'30','THỨ SÁU','21/09 NĂM BÍNH NGỌ','17:00'],[saturday,'31','THỨ BẢY','22/09 NĂM BÍNH NGỌ','10:00']]){
+  const html=ReceptionInfo(invite);assert.match(html,new RegExp(`date-block"><b>${day}<\/b>`));assert.match(html,new RegExp(weekday));assert.match(html,new RegExp(lunar));assert.match(html,new RegExp(time));assert.doesNotMatch(html,/Thêm vào lịch/);
+ }
+});
 test('gallery wraps in both directions',()=>{assert.equal(wrapIndex(-1,12),11);assert.equal(wrapIndex(12,12),0);});
-test('guest name comes safely from the to query parameter with a fallback',()=>{
-  const cases=[
-    ['', 'Quý khách'],
-    ['?to=Nguyen%20Van%20An','Nguyen Van An'],
-    ['?to=Nguyễn%20Văn%20An','Nguyễn Văn An'],
-    ['?to=','Quý khách'],
-    ['?to=%20%20','Quý khách'],
-    ['?to=Anh%20Nam%20và%20Chị%20Lan','Anh Nam và Chị Lan']
-  ];
-  for(const [search,expected] of cases)assert.equal(guestNameFromSearch(search),expected);
-  assert.equal(personalizedGuestName('?to=%20%20'),'');
-  assert.equal(personalizedGuestName('?to=Anh%20Nam'),'Anh Nam');
+test('invitation lookup ignores legacy to and fails safely for missing, changed tokens and network errors',async()=>{
+ const fallback=defaultInvitation(d);assert.equal(fallback.guestName,'Quý khách');assert.equal(fallback.event.receptionDate,'2026-10-31');assert.equal(fallback.event.receptionTime,'10:00');
+ const fallbackCover=InvitationCover(fallback);assert.match(fallbackCover,/cover-date">31 tháng 10, 2026/);assert.match(fallbackCover,/cover-time">10:00/);
+ assert.equal(await resolveInvitation('?to=Injected','https://worker.example',async()=>{throw Error('should not fetch')}),null);
+ assert.equal(await resolveInvitation('?i=bad','https://worker.example'),null);
+ assert.equal(await resolveInvitation(`?i=${'a'.repeat(64)}`,'https://worker.example',async()=>{throw Error('offline')}),null);
+ assert.equal(await resolveInvitation(`?i=${'a'.repeat(64)}`,'https://worker.example',async()=>Response.json({name:'Injected',group:'root',event:'2026-10-30T17:00'})),null);
+});
+test('verified guest values are fetched only by opaque token and validated',async()=>{
+ const token='a'.repeat(64);let requested='';
+ const found=await resolveInvitation(`?i=${token}&to=Ignored`,'https://worker.example/lookup',async(url)=>{requested=url;return Response.json({name:'<b>Khách</b>',group:'Nhà gái',event:'2026-10-30T17:00'});});
+ assert.match(requested,new RegExp(`i=${token}`));assert.doesNotMatch(requested,/Ignored/);assert.deepEqual(found,{name:'<b>Khách</b>',group:'Nhà gái',event:'2026-10-30T17:00'});
+});
+test('guestbook receives only the verified invitation name and locks that field',async()=>{
+ const main=await readFile('src/main.js','utf8'),guestbook=await readFile('src/components/guestbook.js','utf8');
+ assert.match(main,/mountGuestbook\(scroll,selected\?\.name\|\|''\)/);assert.match(guestbook,/name\.value=personalizedName;name\.defaultValue=personalizedName;name\.readOnly=true/);
 });
 test('social preview metadata is static and uses the GitHub Pages URL',async()=>{
   const html=await readFile('index.html','utf8');

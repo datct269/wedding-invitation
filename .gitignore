@@ -4,3 +4,11 @@ node_modules/
 .openai/.local*
 
 .openai/
+guest-links-input*.xlsx
+guest-links-input*.csv
+guest-links-output*.xlsx
+guest-links-output*.csv
+guest-links-kv*.json
+~$guest-links-*.xlsx
+.wrangler/
+.wrangler-config/

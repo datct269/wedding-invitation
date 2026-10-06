@@ -20,6 +20,7 @@
 /* One typography rule for every numeric information field, matching the month heading. */
 :root{--number-font:var(--serif);--number-style:italic;--number-weight:400}
 .cover-date,
+.cover-time,
 .date-block b,.date-block span,
 .time-row,.time-row span,
 .lunar,.banquet strong,
@@ -53,3 +54,5 @@
 
 .guestbook-messages{margin-top:32px}.guestbook-messages:empty{display:none}
 .gallery-photo{will-change:transform,opacity;backface-visibility:hidden;contain:layout paint}.gallery-photo img{transform:translateZ(0)}
+.cover-time{font-size:16px;color:#765258}
+@media(max-width:600px){.cover-time{font-size:14px}}

@@ -1,0 +1,8 @@
+name = "wedding-invitation-lookup"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+
+[[kv_namespaces]]
+binding = "INVITATIONS"
+id = "replace-with-production-kv-namespace-id"
+preview_id = "replace-with-preview-kv-namespace-id"
