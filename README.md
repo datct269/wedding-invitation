@@ -23,6 +23,8 @@ Không có admin, editor, RSVP hoặc countdown. Người dùng bật reduced mo
 
 ## Lời mời JWT và tạo link
 
+**Quyết định production mới:** dùng mã 32 ký tự và Worker/KV. Code hiện tại vẫn là JWT; việc chuyển đổi và deploy chưa thực hiện. Xem [hướng dẫn production và tool tạo link](docs/production-deployment.md) để lưu vết quyết định, cấu hình và quy trình triển khai.
+
 Secret `INVITATION_JWT_SECRET` chỉ ở tool và Worker; KV đã được bỏ. Cấu hình prefix trong `config/link-targets.json`. Sau khi đặt secret, dùng:
 
 ```powershell

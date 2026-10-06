@@ -1,6 +1,8 @@
 # Tạo lời mời bằng JWT
 
-Để thử công khai trước khi có Worker, `npm run links:demo` tạo bốn trang mẫu với mã 32 ký tự trong `public/invitation-demos/`. Chỉ dữ liệu giả `Khách thử nhà trai/nhà gái` được xuất bản. Đây là bảng tra tĩnh cho demo, không phải JWT rút gọn hay tool dùng cho khách thật. Mỗi trang có ảnh OG riêng và mở đúng bìa/lịch. Link mẫu và Excel ở `.local/public-demo-links.json` và `guest-links-output-public-demo.xlsx`; secret vẫn ở file riêng, hiện dùng key tạm do người dùng chỉ định. JWT production vẫn dùng Worker, không cần KV.
+**Tài liệu này mô tả code JWT hiện có.** Quyết định production mới là mã ngẫu nhiên 32 ký tự + Worker/KV, chưa triển khai. Xem [hướng dẫn production và tool](production-deployment.md) để biết phần cần chuyển đổi, prefix mong muốn và quy trình deploy. Những nhận định không dùng KV bên dưới chỉ áp dụng cho bản JWT hiện tại.
+
+Để thử công khai trước khi có Worker, `npm run links:demo` tạo bốn trang mẫu với mã 32 ký tự trong `public/invitation-demos/`. Chỉ dữ liệu giả `Khách thử nhà trai/nhà gái` được xuất bản. Đây là bảng tra tĩnh cho demo, không phải JWT rút gọn hay tool dùng cho khách thật. Mỗi trang có ảnh OG riêng và mở đúng bìa/lịch. Link mẫu và Excel ở `.local/public-demo-links.json` và `guest-links-output-public-demo.xlsx`; secret vẫn ở file riêng, hiện dùng key tạm do người dùng chỉ định. Bản JWT hiện có dùng Worker, không cần KV.
 
 JWT mang `name`, `group`, `event` và `jti` ngẫu nhiên. Payload đọc được bằng Base64URL; secret ký HS256 không nằm trong URL hay JavaScript public. Worker xác minh chữ ký, không dùng KV. JWT không hết hạn mặc định; thay secret vô hiệu hóa tất cả link cũ. Token hex/KV cũ không còn hợp lệ và cần tạo lại.
 
