@@ -17,7 +17,9 @@ style.setProperty('--contentReveal',motion.contentReveal+'ms');style.setProperty
 const petals=`<div class="petal-layer" aria-hidden="true">${Array.from({length:motion.petals.count},(_,i)=>`<span style="--left:${3+i*8.3}%;--duration:${motion.petals.minDuration+(i%6)*(motion.petals.maxDuration-motion.petals.minDuration)/5}ms;--delay:-${i*1.8}s;--size:${7+(i%4)*3}px;--sway:${i%2?38:-28}px"></span>`).join('')}</div>`;
 const localHost=['localhost','127.0.0.1'].includes(window.location.hostname);
 const lookupUrl=localHost?invitationLookupUrl.local:invitationLookupUrl.production;
-const selected=await resolveInvitation(window.location.search,lookupUrl);
+const demoPath=window.location.pathname.match(/\/public\/invitation-demos\/([a-f0-9]{32})\/(?:index\.html)?$/);
+const search=new URLSearchParams(window.location.search).has('i')?window.location.search:demoPath?`?i=${demoPath[1]}`:window.location.search;
+const selected=await resolveInvitation(search,lookupUrl);
 const brideSide=selected?.group==='Nhà gái';
 const invitation=selected?{...data,guestName:selected.name,couple:{...data.couple,groom:brideSide?data.couple.bride:data.couple.groom,bride:brideSide?data.couple.groom:data.couple.bride},event:{...data.event,...(selected.event==='2026-10-30T17:00'?{receptionDate:'2026-10-30',receptionWeekday:'Thứ Sáu',receptionLunarDate:'21/09 năm Bính Ngọ',receptionTime:'17:00'}:{receptionDate:'2026-10-31',receptionWeekday:'Thứ Bảy',receptionLunarDate:'22/09 năm Bính Ngọ',receptionTime:'10:00'})}}:defaultInvitation(data);
 document.querySelector('#app').innerHTML=`${InvitationCover(invitation)}<main id="invitation" class="invitation" hidden inert>${OpeningHero(invitation)}${WeddingCeremony()}${PhotoGallery()}${ReceptionInfo(invitation)}${VenueSection()}${Guestbook()}${GiftSection()}${Footer(invitation)}</main>${petals}${FloatingControls()}${PhotoLightbox()}${GiftModal()}`;

@@ -1,8 +1,22 @@
-name = "wedding-invitation-lookup"
-main = "src/index.js"
+name = "wedding-invitation"
+main = "src/entry.js"
 compatibility_date = "2026-10-01"
 
-[[kv_namespaces]]
-binding = "INVITATIONS"
-id = "replace-with-production-kv-namespace-id"
-preview_id = "replace-with-preview-kv-namespace-id"
+[vars]
+SITE_URL = "https://datct269.github.io/wedding-invitation/"
+LOCAL_SITE_URL = "http://localhost:5173/"
+
+[[rules]]
+type = "CompiledWasm"
+globs = ["**/*.wasm"]
+fallthrough = true
+
+[[rules]]
+type = "Data"
+globs = ["**/*.ttf"]
+fallthrough = true
+
+[[rules]]
+type = "Text"
+globs = ["**/*.svg"]
+fallthrough = true

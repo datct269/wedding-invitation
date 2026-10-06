@@ -1,0 +1,2 @@
+# Copy to worker/.dev.vars, ignored by Git. Use the same value in the link tool.
+INVITATION_JWT_SECRET="replace-with-your-own-random-secret-at-least-32-bytes"

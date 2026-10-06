@@ -31,5 +31,5 @@ export const motion = {
 // Configure the Worker URL here after deployment; empty means safe defaults.
 export const invitationLookupUrl = {
   production: '', // Fill after the production Worker URL is approved/configured.
-  local: 'http://127.0.0.1:8787'
+  local: 'http://127.0.0.1:8787/api/invitation'
 };

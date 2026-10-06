@@ -50,24 +50,25 @@ npm run build
 
 - Chú rể: Chu Tiến Đạt.
 - Cô dâu: Nguyễn Huyền Dịu.
-- Tiệc cưới: 10:00 ngày 30/10/2026, tức 21/09 năm Bính Ngọ âm lịch.
-- Lễ thành hôn: 14:00 ngày 31/10/2026, tức 22/09 năm Bính Ngọ âm lịch.
+- Tiệc mặc định: 10:00 ngày 31/10/2026, tức 22/09 năm Bính Ngọ âm lịch; token có thể chọn 17:00 ngày 30/10/2026 (21/09 âm lịch).
+- Lễ thành hôn: 13:30 ngày 31/10/2026, tức 22/09 năm Bính Ngọ âm lịch; phần này không đổi theo token.
 - Thông tin hai gia đình, địa chỉ và tọa độ bản đồ nằm trong `src/data.js`.
 
 Khi thay đổi nội dung, hãy sửa nguồn dữ liệu trong `src/data.js` thay vì viết trực tiếp vào component. Không sao chép thông tin tài khoản ngân hàng sang tài liệu hoặc component khác.
 
 ## Cá nhân hóa tên khách
 
-Tên khách được lấy từ query parameter `to`:
+Lời mời được lấy từ JWT trong query parameter `i`, xác minh HS256 ở Worker. Payload chứa tên, nhóm và lịch; không dùng KV. `to` cũ bị bỏ qua.
 
 ```text
-https://datct269.github.io/wedding-invitation/?to=Nguyễn%20Văn%20An
+https://YOUR-WORKER/invite?i=<jwt>
 ```
 
-- Chuẩn hóa bằng `URLSearchParams` và `trim()` trong `src/lib.js`.
-- Giá trị mặc định là `Quý khách` nếu thiếu, rỗng hoặc chỉ có khoảng trắng.
+- Secret chỉ nằm trong tool và Worker; không đưa vào JavaScript public hoặc Git. Payload JWT đọc được, đã được người dùng chấp nhận.
+- Token thiếu/sai hoặc Worker lỗi dùng `Quý khách`, Tiến Đạt – Huyền Dịu và 31/10/2026 10:00.
 - Hiển thị bằng text binding an toàn; không dùng `innerHTML` với dữ liệu do khách nhập.
-- Khi URL có tên khách, sổ lưu bút dùng sẵn tên đó và khóa trường tên. Khi không có tên, khách có thể nhập tên.
+- Khi Worker trả tên đã xác minh, sổ lưu bút dùng cùng tên và khóa trường tên. Khi fallback, khách có thể nhập tên.
+- Tool XLSX/CSV và cấu hình môi trường xem `docs/invitation-links.md`; dữ liệu khách và secret phải bị Git bỏ qua.
 
 ## Quy tắc ảnh và tài nguyên
 

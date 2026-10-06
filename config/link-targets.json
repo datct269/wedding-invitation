@@ -1,0 +1,17 @@
+{
+  "defaultTarget": "local",
+  "targets": {
+    "local": {
+      "prefix": "http://localhost:8787/invite",
+      "siteUrl": "http://localhost:5173/"
+    },
+    "github": {
+      "prefix": "",
+      "siteUrl": "https://datct269.github.io/wedding-invitation/"
+    },
+    "cloudflare": {
+      "prefix": "",
+      "siteUrl": ""
+    }
+  }
+}
