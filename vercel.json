@@ -1,0 +1,14 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "functions": {
+    "api/invitation.js": { "includeFiles": "index.html" },
+    "api/og.js": { "includeFiles": "public/{fonts,images/decorations}/**" }
+  },
+  "routes": [
+    { "src": "^/(?:index\\.html)?$", "dest": "/api/invitation" },
+    { "src": "^/wedding-invitation(?:/(?:index\\.html)?)?$", "dest": "/api/invitation" },
+    { "src": "^/wedding-invitation/(src|public)/(.*)$", "dest": "/$1/$2" },
+    { "handle": "filesystem" }
+  ]
+}

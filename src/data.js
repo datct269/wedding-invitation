@@ -1,11 +1,18 @@
+// All invitation variants use these fixed reception slots.
+export const receptionSlots = {
+  oct30: { date: '2026-10-30', weekday: 'Thứ Sáu', lunarDate: '21/09 năm Bính Ngọ', time: '17:00' },
+  oct31: { date: '2026-10-31', weekday: 'Thứ Bảy', lunarDate: '22/09 năm Bính Ngọ', time: '10:00' }
+};
+export const invitationDefaults = { side: 'groom', slot: 'oct31' };
 // Replace asset files or update paths here. Components never import photographs.
 export const invitationData = {
   couple: { groom: 'Tiến Đạt', bride: 'Huyền Dịu', groomFull: 'Chu Tiến Đạt', brideFull: 'Nguyễn Huyền Dịu' },
   guestName: 'Quý khách',
+  publicSiteURL: 'https://datct269.github.io/wedding-invitation/',
   event: {
     date: '2026-10-31',
-    ceremonyDate: '2026-10-31', ceremonyWeekday: 'Thứ Bảy', ceremonyLunarDate: '22/09 năm Bính Ngọ', ceremonyTime: '14:00', ceremonyVenue: 'Tư gia',
-    receptionDate: '2026-10-30', receptionWeekday: 'Thứ Sáu', receptionLunarDate: '21/09 năm Bính Ngọ', receptionTime: '10:00', endTime: '20:30'
+    ceremonyDate: '2026-10-31', ceremonyWeekday: 'Thứ Bảy', ceremonyLunarDate: '22/09 năm Bính Ngọ', ceremonyTime: '13:30', ceremonyVenue: 'Tư gia',
+    receptionDate: receptionSlots.oct31.date, receptionWeekday: receptionSlots.oct31.weekday, receptionLunarDate: receptionSlots.oct31.lunarDate, receptionTime: receptionSlots.oct31.time
   },
   families: [
     { title: 'Nhà trai', mapQuery: '21.131066103159878,105.9095027585827', father: 'Chu Văn Phi', mother: 'Đinh Thị Thu', address: 'Thôn Đình Ngọc, Xã Thư Lâm, TP Hà Nội' },

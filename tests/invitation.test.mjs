@@ -1,15 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {access,readFile} from 'node:fs/promises';
-import {calendarCells,calendarURL,escapeHTML,guestNameFromSearch,personalizedGuestName} from '../src/lib.js';
+import {calendarCells,escapeHTML,guestNameFromSearch,personalizedGuestName} from '../src/lib.js';
 import {invitationData as d} from '../src/data.js';
 import {guestbookStore} from '../src/guestbook-store.js';
 import {wrapIndex} from '../src/components/gallery.js';
 import {ReceptionInfo,WeddingCeremony} from '../src/components/sections.js';
 test('calendar starts Monday and handles leap years',()=>{assert.deepEqual(calendarCells('2026-04-07').cells.slice(0,4),[null,null,1,2]);assert.equal(calendarCells('2024-02-29').cells.filter(Boolean).length,29);});
-test('calendar uses the reception date, Vietnam timezone and reception end time',()=>{const url=new URL(calendarURL());assert.equal(url.searchParams.get('ctz'),'Asia/Ho_Chi_Minh');assert.equal(url.searchParams.get('dates'),'20261030T100000/20261030T203000');});
-test('ceremony and reception dates match their lunar dates',()=>{assert.deepEqual({date:d.event.receptionDate,lunar:d.event.receptionLunarDate,weekday:d.event.receptionWeekday},{date:'2026-10-30',lunar:'21/09 năm Bính Ngọ',weekday:'Thứ Sáu'});assert.deepEqual({date:d.event.ceremonyDate,lunar:d.event.ceremonyLunarDate,weekday:d.event.ceremonyWeekday},{date:'2026-10-31',lunar:'22/09 năm Bính Ngọ',weekday:'Thứ Bảy'});});
-test('ceremony and reception render their own dates',()=>{assert.match(WeddingCeremony(),/date-block"><b>31<\/b>/);assert.match(WeddingCeremony(),/22\/09 NĂM BÍNH NGỌ/);assert.match(ReceptionInfo(),/date-block"><b>30<\/b>/);assert.match(ReceptionInfo(),/21\/09 NĂM BÍNH NGỌ/);});
+test('ceremony and default reception dates match their lunar dates',()=>{assert.deepEqual({date:d.event.receptionDate,lunar:d.event.receptionLunarDate,weekday:d.event.receptionWeekday},{date:'2026-10-31',lunar:'22/09 năm Bính Ngọ',weekday:'Thứ Bảy'});assert.deepEqual({date:d.event.ceremonyDate,lunar:d.event.ceremonyLunarDate,weekday:d.event.ceremonyWeekday},{date:'2026-10-31',lunar:'22/09 năm Bính Ngọ',weekday:'Thứ Bảy'});});
+test('ceremony and reception render their default dates with different hours',()=>{assert.match(WeddingCeremony(),/date-block"><b>31<\/b>/);assert.match(WeddingCeremony(),/13:30/);assert.match(ReceptionInfo(),/date-block"><b>31<\/b>/);assert.match(ReceptionInfo(),/10:00/);assert.doesNotMatch(ReceptionInfo(),/Thêm vào lịch/);});
 test('gallery wraps in both directions',()=>{assert.equal(wrapIndex(-1,12),11);assert.equal(wrapIndex(12,12),0);});
 test('guest name comes safely from the to query parameter with a fallback',()=>{
   const cases=[

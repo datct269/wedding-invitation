@@ -19,7 +19,7 @@
 
 /* One typography rule for every numeric information field, matching the month heading. */
 :root{--number-font:var(--serif);--number-style:italic;--number-weight:400}
-.cover-date,
+.cover-date,.cover-time,
 .date-block b,.date-block span,
 .time-row,.time-row span,
 .lunar,.banquet strong,
@@ -53,3 +53,8 @@
 
 .guestbook-messages{margin-top:32px}.guestbook-messages:empty{display:none}
 .gallery-photo{will-change:transform,opacity;backface-visibility:hidden;contain:layout paint}.gallery-photo img{transform:translateZ(0)}
+
+.cover-time{font-size:16px;line-height:1.5;margin-top:3px;color:#765258}
+.guest-name{overflow-wrap:anywhere}
+@media(max-width:600px){.cover-time{font-size:14px}.cover-card{min-height:560px}}
+@media(max-height:650px) and (max-width:600px){.cover-card{min-height:0;padding-top:96px}.cover .invitation-message{margin-block:10px 16px}}
