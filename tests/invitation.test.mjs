@@ -35,11 +35,11 @@ test('invitation lookup ignores legacy to and fails safely for missing, changed 
  const fallbackCover=InvitationCover(fallback);assert.match(fallbackCover,/cover-date">31 tháng 10, 2026/);assert.match(fallbackCover,/cover-time">10:00/);
  assert.equal(await resolveInvitation('?to=Injected','https://worker.example',async()=>{throw Error('should not fetch')}),null);
  assert.equal(await resolveInvitation('?i=bad','https://worker.example'),null);
- assert.equal(await resolveInvitation('?i=header.payload.signature','https://worker.example',async()=>{throw Error('offline')}),null);
- assert.equal(await resolveInvitation('?i=header.payload.signature','https://worker.example',async()=>Response.json({name:'Injected',group:'root',event:'2026-10-30T17:00'})),null);
+ assert.equal(await resolveInvitation('?i='+'a'.repeat(32),'https://worker.example',async()=>{throw Error('offline')}),null);
+ assert.equal(await resolveInvitation('?i='+'a'.repeat(32),'https://worker.example',async()=>Response.json({name:'Injected',group:'root',event:'2026-10-30T17:00'})),null);
 });
-test('JWT guest values are fetched from the verifying Worker and legacy to is ignored',async()=>{
- const token='header.payload.signature';let requested='';
+test('32-character codes fetch KV data through Worker and legacy to is ignored',async()=>{
+ const token='a'.repeat(32);let requested='';
  const found=await resolveInvitation(`?i=${token}&to=Ignored`,'https://worker.example/lookup',async(url)=>{requested=url;return Response.json({name:'<b>Khách</b>',group:'Nhà gái',event:'2026-10-30T17:00'});});
  assert.match(requested,new RegExp(`i=${token}`));assert.doesNotMatch(requested,/Ignored/);assert.deepEqual(found,{name:'<b>Khách</b>',group:'Nhà gái',event:'2026-10-30T17:00'});
 });

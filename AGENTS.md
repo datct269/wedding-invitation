@@ -58,17 +58,17 @@ Khi thay đổi nội dung, hãy sửa nguồn dữ liệu trong `src/data.js` t
 
 ## Cá nhân hóa tên khách
 
-Lời mời được lấy từ JWT trong query parameter `i`, xác minh HS256 ở Worker. Payload chứa tên, nhóm và lịch; không dùng KV. `to` cũ bị bỏ qua.
+Lời mời dùng mã ngẫu nhiên 32 ký tự hex trong query parameter `i`. Worker tra binding KV `INVITATIONS` để lấy tên, nhóm và lịch; không dùng JWT. `to` cũ bị bỏ qua.
 
 ```text
-https://YOUR-WORKER/invite?i=<jwt>
+https://YOUR-WORKER/invite?i=<mã-32-ký-tự>
 ```
 
-- Secret chỉ nằm trong tool và Worker; không đưa vào JavaScript public hoặc Git. Payload JWT đọc được, đã được người dùng chấp nhận.
+- Mã có 128 bit ngẫu nhiên, không chứa dữ liệu khách và không cần secret ký JWT. Quyền Cloudflare chỉ ở môi trường quản lý; không đưa vào JavaScript public hoặc Git. Không cung cấp API liệt kê/ghi KV công khai.
 - Token thiếu/sai hoặc Worker lỗi dùng `Quý khách`, Tiến Đạt – Huyền Dịu và 31/10/2026 10:00.
 - Hiển thị bằng text binding an toàn; không dùng `innerHTML` với dữ liệu do khách nhập.
 - Khi Worker trả tên đã xác minh, sổ lưu bút dùng cùng tên và khóa trường tên. Khi fallback, khách có thể nhập tên.
-- Tool XLSX/CSV và cấu hình môi trường xem `docs/invitation-links.md`; dữ liệu khách và secret phải bị Git bỏ qua.
+- Tool XLSX/CSV và cấu hình môi trường xem `docs/invitation-links.md`, deploy xem `docs/production-deployment.md`; dữ liệu khách, batch KV và credential phải bị Git bỏ qua.
 
 ## Quy tắc ảnh và tài nguyên
 

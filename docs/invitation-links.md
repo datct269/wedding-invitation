@@ -1,20 +1,16 @@
-# Tạo lời mời bằng JWT
+# Tạo lời mời bằng mã 32 ký tự
 
-**Tài liệu này mô tả code JWT hiện có.** Quyết định production mới là mã ngẫu nhiên 32 ký tự + Worker/KV, chưa triển khai. Xem [hướng dẫn production và tool](production-deployment.md) để biết phần cần chuyển đổi, prefix mong muốn và quy trình deploy. Những nhận định không dùng KV bên dưới chỉ áp dụng cho bản JWT hiện tại.
+Tool `scripts/create-guest-links.mjs` dùng ExcelJS đọc/ghi XLSX/CSV, sinh 16 byte ngẫu nhiên mật mã thành 32 ký tự hex và xuất batch KV. Worker tra KV, không dùng JWT hay secret ký. Link JWT cũ cần tạo lại. File và credential riêng không được commit.
 
-Để thử công khai trước khi có Worker, `npm run links:demo` tạo bốn trang mẫu với mã 32 ký tự trong `public/invitation-demos/`. Chỉ dữ liệu giả `Khách thử nhà trai/nhà gái` được xuất bản. Đây là bảng tra tĩnh cho demo, không phải JWT rút gọn hay tool dùng cho khách thật. Mỗi trang có ảnh OG riêng và mở đúng bìa/lịch. Link mẫu và Excel ở `.local/public-demo-links.json` và `guest-links-output-public-demo.xlsx`; secret vẫn ở file riêng, hiện dùng key tạm do người dùng chỉ định. Bản JWT hiện có dùng Worker, không cần KV.
+## Chuẩn bị local
 
-JWT mang `name`, `group`, `event` và `jti` ngẫu nhiên. Payload đọc được bằng Base64URL; secret ký HS256 không nằm trong URL hay JavaScript public. Worker xác minh chữ ký, không dùng KV. JWT không hết hạn mặc định; thay secret vô hiệu hóa tất cả link cũ. Token hex/KV cũ không còn hợp lệ và cần tạo lại.
-
-## Chạy local
-
-1. Tạo secret riêng trong file bị Git bỏ qua (lệnh không in secret):
+Node.js 20 trở lên:
 
 ```powershell
-node -e "const fs=require('fs');fs.writeFileSync('worker/.dev.vars','INVITATION_JWT_SECRET='+require('crypto').randomBytes(32).toString('hex')+'\n')"
+npm ci
 ```
 
-2. Mở hai terminal trong repo:
+Mở hai terminal ở thư mục repo:
 
 ```powershell
 npm run worker:dev
@@ -24,57 +20,83 @@ npm run worker:dev
 npm run dev
 ```
 
-3. Sinh bốn lời mời giả (hai nhóm × hai lịch), không cần seed hay upload:
+Website ở http://localhost:5173, Worker ở http://localhost:8787. KV giả lập dùng binding `INVITATIONS` trong `worker/wrangler.toml`, không cần tài khoản Cloudflare. ID toàn số 0 chỉ dành cho local, phải thay trước deploy.
 
-```powershell
-npm run links:examples
-```
-
-Các URL nằm trong `.local/guest-links-examples.json`. `share` đi qua Worker local, `site` mở thẳng website local. Cả hai chỉ dùng trên máy chạy local. Telegram cần URL Worker công khai để truy cập; localhost không thể tạo preview trong Telegram.
-
-## Tạo link từ Excel/CSV
+## Tạo Excel mẫu và điền khách
 
 ```powershell
 npm run links:template
 ```
 
-Điền ba cột `Tên khách`, `Nhóm khách`, `Lịch tiệc` trong `guest-links-input-template.xlsx`. Nhóm chọn `Nhà trai`/`Nhà gái`; lịch chọn `30/10/2026 17:00`/`31/10/2026 10:00`. Tên trống bị bỏ qua. Nhóm/lịch trống mặc định `Nhà gái` và `31/10/2026 10:00`. Mỗi dòng có token riêng kể cả trùng tên.
+Tool mẫu `scripts/create-link-template.mjs` tạo `guest-links-input-template.xlsx`, có dropdown/mặc định ở 100 dòng:
 
-Tool đọc secret từ `INVITATION_JWT_SECRET`; lấy cùng giá trị Worker local đang dùng mà không in ra:
+| Cột | Giá trị |
+| --- | --- |
+| Tên khách | Tên có dấu, tối đa 80 ký tự sau trim; tên trống bị bỏ qua |
+| Nhóm khách | Nhà trai hoặc Nhà gái; trống mặc định Nhà gái |
+| Lịch tiệc | 30/10/2026 17:00 hoặc 31/10/2026 10:00; trống mặc định 31/10/2026 10:00 |
+
+CSV dùng UTF-8 và cùng header, không có dropdown:
+
+```csv
+Tên khách,Nhóm khách,Lịch tiệc
+Khách thử nhà trai,Nhà trai,30/10/2026 17:00
+Khách thử nhà gái,,
+```
+
+## Sinh link và nhập KV
 
 ```powershell
-$env:INVITATION_JWT_SECRET = ((Get-Content worker/.dev.vars | Where-Object { $_ -match '^INVITATION_JWT_SECRET=' }) -replace '^INVITATION_JWT_SECRET=', '').Trim('"')
 npm run links:create -- guest-links-input-template.xlsx guest-links-output.xlsx --target local
-Remove-Item Env:INVITATION_JWT_SECRET
+npm run links:import -- guest-links-output-kv.json --local
 ```
 
-CSV dùng cùng header và giá trị:
+Hoặc CSV:
 
 ```powershell
-npm run links:create -- guest-links-input.csv guest-links-output.csv --target local
+npm run links:create -- guest-links-input.csv guest-links-output-csv.csv --target local
+npm run links:import -- guest-links-output-csv-kv.json --local
 ```
 
-Đầu ra có tên, nhóm, lịch và link. Dùng ExcelJS đọc/ghi XLSX/CSV, `jose` ký/xác minh JWT. File đầu vào/kết quả với prefix `guest-links-input*`, `guest-links-output*` bị Git bỏ qua; nếu đặt tên khác phải tự thêm vào `.gitignore`. Không commit dữ liệu khách.
+Excel/CSV kết quả có tên, nhóm, lịch và link. Batch JSON nằm cạnh output với hậu tố `-kv.json`; mỗi bản ghi có `key` là mã, `value` là chuỗi JSON `{name,group,event}`. Dòng trùng tên vẫn có mã khác. Tool từ chối ghi đè output/batch đã có; dùng tên output mới cho batch mới và giữ cặp file cùng batch.
 
-## Cấu hình URL
+`scripts/import-invitations.mjs` kiểm tra batch, tra mã hiện có và từ chối dữ liệu khác trước khi nhập. Nhập lại cùng dữ liệu được phép. Không chạy hai tiến trình nhập đồng thời; KV không có thao tác ghi có điều kiện nguyên tử. Link chỉ hoạt động sau khi nhập đúng batch; KV production có thể cần thời gian lan truyền.
 
-`config/link-targets.json` chứa `defaultTarget` và ba target `local`, `github`, `cloudflare`. Mỗi target có `prefix` (URL share Worker, thường kết thúc `/invite`) và `siteUrl` (website đích). Tool dùng `prefix`; đặt cùng `siteUrl` vào `SITE_URL` trong cấu hình Worker production hoặc `LOCAL_SITE_URL` khi local. Chọn `--target github`/`--target cloudflare`; hai prefix production đang trống và tool sẽ báo lỗi thay vì tự đoán domain.
-
-Có thể dùng config ở đường dẫn khác hoặc override prefix:
+Tạo bốn ví dụ local (hai nhóm × hai lịch):
 
 ```powershell
-npm run links:create -- guest-links-input.xlsx guest-links-output.xlsx --config path/to/link-targets.json --target github
-npm run links:create -- guest-links-input.xlsx guest-links-output.xlsx --prefix https://YOUR-WORKER/invite
+npm run links:examples
+npm run links:import -- .local/guest-links-examples-kv.json --local
 ```
 
-Prefix GitHub vẫn là URL share Worker để bot nhận metadata động; người mở được redirect về GitHub Pages. Link thẳng GitHub Pages chỉ có ảnh OG mặc định tĩnh.
+Các link nằm trong `.local/guest-links-examples.json`. Không gửi localhost cho Telegram/người ở máy khác. `npm run links:demo` chỉ tạo trang public cho khách giả; không dùng tool demo cho khách thật.
 
-## Worker và preview
+## Prefix và config riêng
 
-- `GET /api/invitation?i=<jwt>` trả `{name, group, event}` sau khi xác minh; token lỗi trả 401. CORS cho origin website cấu hình; localhost chỉ được phép khi bật `LOCAL_DEVELOPMENT=true`.
-- `GET /invite?i=<jwt>` redirect trình duyệt tới `SITE_URL` kèm token. Bot Telegram/WhatsApp nhận HTML Open Graph với URL canonical riêng theo token.
-- `GET /preview.png?i=<jwt>` trả PNG 1200×630 theo tên, nhóm và lịch. `@resvg/resvg-wasm` render artwork hoa hiện có với font Noto (giấy phép OFL trong `worker/assets/OFL.txt`). Token sai/thiếu cho preview mặc định: Quý khách, Tiến Đạt – Huyền Dịu, 31/10/2026 10:00.
+`config/link-targets.json` chứa `defaultTarget`, target `local`, `github`, `cloudflare` với `prefix` (Worker `/invite`) và `siteUrl` (website). Tool đọc prefix bằng `scripts/link-config.mjs`; có thể override:
 
-Trang thiệp gọi API Worker bằng URL tập trung ở `invitationLookupUrl` trong `src/data.js`. `production` hiện trống nên public Pages vẫn dùng mặc định. Worker local dùng `.dev.vars`; Worker production phải đặt `INVITATION_JWT_SECRET` bằng Wrangler Secret, cùng giá trị tool dùng. Không đặt secret trong `[vars]`, config target hay JavaScript.
+```powershell
+npm run links:create -- guest-links-input-template.xlsx guest-links-output-batch2.xlsx --config path/to/link-targets.json --target github
+npm run links:create -- guest-links-input.csv guest-links-output-batch3.csv --prefix https://YOUR-WORKER/invite
+```
 
-Trước khi dùng công khai cần tự cấu hình domain Worker, `SITE_URL`, secret Worker và `invitationLookupUrl.production` thành `https://YOUR-WORKER/api/invitation`. Không cần KV hay upload danh sách khách. Bước triển khai hiện tại chỉ kiểm thử local, không đăng nhập/deploy Cloudflare.
+`--prefix` ưu tiên hơn config. Không thêm `?i` vào prefix; tool tự thêm mã. Prefix production hiện trống cho đến khi có URL Worker thật. Target `github` vẫn dùng URL share Worker; Worker chuyển người mở về Pages. Target `cloudflare` dành cho website ở URL khác, phải cấu hình SITE_URL/API/CORS tương ứng.
+
+## Dùng production sau deploy
+
+Xem [quy trình deploy](production-deployment.md). Khi URL/binding đã cấu hình và được phép ghi dữ liệu Cloudflare:
+
+```powershell
+npm run links:create -- guest-links-input-template.xlsx guest-links-output-prod.xlsx --target github
+npm run links:import -- guest-links-output-prod-kv.json --remote
+```
+
+Kiểm tra link thật trước khi gửi. API `/api/invitation?i=<mã>` chỉ trả tên, nhóm, lịch của một mã; không liệt kê/ghi KV công khai. `/invite` trả preview cho bot và redirect người mở, `/preview.png` trả PNG 1200×630 theo cùng dữ liệu. CORS chỉ cho origin website; localhost chỉ trong local mode.
+
+Thiếu/sai mã hoặc lỗi Worker dùng Quý khách, Tiến Đạt – Huyền Dịu và 31/10/2026 10:00. Query `to`/nhóm/lịch tự thêm bị bỏ qua. Sổ lưu bút khóa cùng tên đã tra. Lễ cưới giữ 13:30 ngày 31/10/2026.
+
+## Dữ liệu riêng
+
+`guest-links-input*.xlsx/csv`, `guest-links-output*.xlsx/csv/json`, `.local/`, `.dev.vars*`, `.env*` và `dist/` bị Git bỏ qua. Nếu đặt tên khác, thêm ignore trước khi tạo. Batch KV chứa tên khách; không đặt trong public hoặc log. Giữ bản sao input/output/batch ở nơi riêng. Kiểm tra `git status`, `git diff --cached`, `git check-ignore <file>` trước commit.
+
+Ai có link có thể xem lời mời. Không lưu thêm thông tin nhạy cảm trong KV; xóa đúng mã để thu hồi lời mời nếu được yêu cầu.

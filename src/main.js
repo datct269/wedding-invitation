@@ -19,7 +19,7 @@ const localHost=['localhost','127.0.0.1'].includes(window.location.hostname);
 const lookupUrl=localHost?invitationLookupUrl.local:invitationLookupUrl.production;
 const demoPath=window.location.pathname.match(/\/public\/invitation-demos\/([a-f0-9]{32})\/(?:index\.html)?$/);
 const search=new URLSearchParams(window.location.search).has('i')?window.location.search:demoPath?`?i=${demoPath[1]}`:window.location.search;
-const selected=await resolveInvitation(search,lookupUrl);
+const selected=await resolveInvitation(search,lookupUrl,globalThis.fetch,demoPath?document.baseURI:undefined);
 const brideSide=selected?.group==='Nhà gái';
 const invitation=selected?{...data,guestName:selected.name,couple:{...data.couple,groom:brideSide?data.couple.bride:data.couple.groom,bride:brideSide?data.couple.groom:data.couple.bride},event:{...data.event,...(selected.event==='2026-10-30T17:00'?{receptionDate:'2026-10-30',receptionWeekday:'Thứ Sáu',receptionLunarDate:'21/09 năm Bính Ngọ',receptionTime:'17:00'}:{receptionDate:'2026-10-31',receptionWeekday:'Thứ Bảy',receptionLunarDate:'22/09 năm Bính Ngọ',receptionTime:'10:00'})}}:defaultInvitation(data);
 document.querySelector('#app').innerHTML=`${InvitationCover(invitation)}<main id="invitation" class="invitation" hidden inert>${OpeningHero(invitation)}${WeddingCeremony()}${PhotoGallery()}${ReceptionInfo(invitation)}${VenueSection()}${Guestbook()}${GiftSection()}${Footer(invitation)}</main>${petals}${FloatingControls()}${PhotoLightbox()}${GiftModal()}`;

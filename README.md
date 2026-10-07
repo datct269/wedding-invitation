@@ -21,16 +21,16 @@ Không có admin, editor, RSVP hoặc countdown. Người dùng bật reduced mo
 
 `scripts/create-assets.mjs` chỉ để tái tạo bộ asset minh họa ban đầu; không chạy sau khi đã thay ảnh thật.
 
-## Lời mời JWT và tạo link
+## Lời mời mã 32 ký tự và tạo link
 
-**Quyết định production mới:** dùng mã 32 ký tự và Worker/KV. Code hiện tại vẫn là JWT; việc chuyển đổi và deploy chưa thực hiện. Xem [hướng dẫn production và tool tạo link](docs/production-deployment.md) để lưu vết quyết định, cấu hình và quy trình triển khai.
+Lời mời dùng mã ngẫu nhiên 32 ký tự và Worker/KV. Xem [hướng dẫn production](docs/production-deployment.md) để cấu hình và triển khai. Worker production chưa được deploy.
 
-Secret `INVITATION_JWT_SECRET` chỉ ở tool và Worker; KV đã được bỏ. Cấu hình prefix trong `config/link-targets.json`. Sau khi đặt secret, dùng:
+Tool `scripts/create-guest-links.mjs` xuất Excel/CSV và batch KV, không cần secret ký. Cấu hình prefix trong `config/link-targets.json`, rồi dùng:
 
 ```powershell
 npm run links:template
 npm run links:create -- guest-links-input-template.xlsx guest-links-output.xlsx --target local
-npm run links:examples
+npm run links:import -- guest-links-output-kv.json --local
 ```
 
-Xem [hướng dẫn đầy đủ](docs/invitation-links.md) về secret, cấu hình prefix local/GitHub/Cloudflare, Excel/CSV và Worker preview.
+Xem [hướng dẫn đầy đủ](docs/invitation-links.md) về cấu hình prefix local/GitHub/Cloudflare, Excel/CSV, nhập KV và Worker preview.

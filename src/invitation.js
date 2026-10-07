@@ -4,10 +4,10 @@ export function defaultInvitation(data=invitationData){
   return {...data,guestName:data.guestName,event:{...data.event,receptionDate:'2026-10-31',receptionWeekday:'Thứ Bảy',receptionLunarDate:'22/09 năm Bính Ngọ',receptionTime:'10:00'}};
 }
 
-export async function resolveInvitation(search,endpoint,fetcher=globalThis.fetch,demoBase=globalThis.document?.baseURI){
+export async function resolveInvitation(search,endpoint,fetcher=globalThis.fetch,demoBase){
   const token=new URLSearchParams(search).get('i')||'';
   const demo=Boolean(demoBase&&/^[a-f0-9]{32}$/.test(token));
-  if(!demo&&(!endpoint||token.length>2048||! /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(token)))return null;
+  if(!/^[a-f0-9]{32}$/.test(token)||(!demo&&!endpoint))return null;
   try{
     const address=demo?new URL(`public/invitation-demos/${token}/invitation.json`,demoBase).href:`${endpoint.replace(/\/$/,'')}?i=${encodeURIComponent(token)}`;
     const response=await fetcher(address,{headers:{Accept:'application/json'},signal:AbortSignal.timeout(4000)});

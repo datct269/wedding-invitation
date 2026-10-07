@@ -1,4 +1,4 @@
-import {verifyInvitation} from '../../shared/invitation-token.js';
+import {lookupInvitation} from '../../shared/invitation-token.js';
 import {renderPreview, previewDetails, escape} from './preview.js';
 
 const defaultSite='https://datct269.github.io/wedding-invitation/';
@@ -16,7 +16,7 @@ export default {
     if(request.method==='OPTIONS')return new Response(null,{status:204,headers:cors});
     if(request.method!=='GET')return new Response('Method not allowed',{status:405,headers:cors});
     const token=url.searchParams.get('i')||'';
-    const selected=await verifyInvitation(token,env.INVITATION_JWT_SECRET);
+    const selected=await lookupInvitation(token,env.INVITATIONS);
     if(url.pathname==='/api/invitation')return Response.json(selected||{error:'Invalid invitation'},{status:selected?200:401,headers:cors});
     if(url.pathname==='/preview.png') {
       try {return new Response(await renderPreview(selected),{headers:{...cacheHeaders,'Content-Type':'image/png'}});}

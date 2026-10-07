@@ -1,24 +1,19 @@
-import {SignJWT, jwtVerify} from 'jose';
-
-const encoder = new TextEncoder();
 export function invitationFields(value) {
   if (!value || typeof value.name !== 'string' || !value.name.trim() || value.name.trim().length > 80 || !['Nhà trai', 'Nhà gái'].includes(value.group) || !['2026-10-30T17:00', '2026-10-31T10:00'].includes(value.event)) return null;
   return {name: value.name.trim(), group: value.group, event: value.event};
 }
-function key(secret) {
-  if (typeof secret !== 'string' || !secret.length) throw new Error('INVITATION_JWT_SECRET must be configured.');
-  return encoder.encode(secret);
+
+export function validToken(token) {
+  return typeof token === 'string' && /^[a-f0-9]{32}$/.test(token);
 }
-export async function signInvitation(value, secret) {
-  const fields = invitationFields(value);
-  if (!fields) throw new Error('Invalid invitation fields.');
-  return new SignJWT(fields).setProtectedHeader({alg: 'HS256', typ: 'JWT'}).setJti(crypto.randomUUID()).sign(key(secret));
+
+export function createInvitationToken() {
+  return Array.from(crypto.getRandomValues(new Uint8Array(16)), byte => byte.toString(16).padStart(2, '0')).join('');
 }
-export async function verifyInvitation(token, secret) {
+
+export async function lookupInvitation(token, kv) {
+  if (!validToken(token) || !kv) return null;
   try {
-    if (typeof token !== 'string' || token.length > 2048) return null;
-    const {payload, protectedHeader} = await jwtVerify(token, key(secret), {algorithms: ['HS256']});
-    if (protectedHeader.typ !== 'JWT' || typeof payload.jti !== 'string' || !payload.jti) return null;
-    return invitationFields(payload);
+    return invitationFields(await kv.get(token, {type: 'json'}));
   } catch { return null; }
 }
