@@ -69,7 +69,7 @@ npm run links:examples
 npm run links:import -- .local/guest-links-examples-kv.json --local
 ```
 
-Các link nằm trong `.local/guest-links-examples.json`. Không gửi localhost cho Telegram/người ở máy khác. `npm run links:demo` chỉ tạo trang public cho khách giả; không dùng tool demo cho khách thật.
+Các link nằm trong `.local/guest-links-examples.json`. Không gửi localhost cho Telegram/người ở máy khác. `npm run links:demo` tạo bốn trang khách giả và mẫu public “Bạn Đạt” do chủ website yêu cầu; không dùng tool demo cho danh sách khách thật.
 
 ## Prefix và config riêng
 
