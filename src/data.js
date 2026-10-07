@@ -4,8 +4,8 @@ export const invitationData = {
   guestName: 'Quý khách',
   event: {
     date: '2026-10-31',
-    ceremonyDate: '2026-10-31', ceremonyWeekday: 'Thứ Bảy', ceremonyLunarDate: '22/09 năm Bính Ngọ', ceremonyTime: '13:30', ceremonyVenue: 'Tư gia',
-    receptionDate: '2026-10-30', receptionWeekday: 'Thứ Sáu', receptionLunarDate: '21/09 năm Bính Ngọ', receptionTime: '10:00'
+    ceremonyDate: '2026-10-31', ceremonyWeekday: 'Thứ Bảy', ceremonyLunarDate: '22/09 năm Bính Ngọ', ceremonyTime: '14:00', ceremonyVenue: 'Tư gia',
+    receptionDate: '2026-10-30', receptionWeekday: 'Thứ Sáu', receptionLunarDate: '21/09 năm Bính Ngọ', receptionTime: '10:00', endTime: '20:30'
   },
   families: [
     { title: 'Nhà trai', mapQuery: '21.131066103159878,105.9095027585827', father: 'Chu Văn Phi', mother: 'Đinh Thị Thu', address: 'Thôn Đình Ngọc, Xã Thư Lâm, TP Hà Nội' },
@@ -27,9 +27,4 @@ export const motion = {
   floatDistance:8,floatDurations:[5000,5500,6000,6500],
   petals:{count:12,minDuration:11000,maxDuration:24000},
   autoScrollSpeed:18,interactionPause:9000
-};
-// Configure the Worker URL here after deployment; empty means safe defaults.
-export const invitationLookupUrl = {
-  production: '', // Fill after the production Worker URL is approved/configured.
-  local: 'http://127.0.0.1:8787/api/invitation'
 };

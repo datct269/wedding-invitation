@@ -20,17 +20,3 @@ Mở http://localhost:5173. Build tĩnh nằm trong `dist/`; phục vụ thư m�
 Không có admin, editor, RSVP hoặc countdown. Người dùng bật reduced motion sẽ không bị tự cuộn mặc định và không có chuyển động nền.
 
 `scripts/create-assets.mjs` chỉ để tái tạo bộ asset minh họa ban đầu; không chạy sau khi đã thay ảnh thật.
-
-## Lời mời mã 32 ký tự và tạo link
-
-Lời mời dùng mã ngẫu nhiên 32 ký tự và Worker/KV. Xem [hướng dẫn production](docs/production-deployment.md) để cấu hình và triển khai. Worker production chưa được deploy.
-
-Tool `scripts/create-guest-links.mjs` xuất Excel/CSV và batch KV, không cần secret ký. Cấu hình prefix trong `config/link-targets.json`, rồi dùng:
-
-```powershell
-npm run links:template
-npm run links:create -- guest-links-input-template.xlsx guest-links-output.xlsx --target local
-npm run links:import -- guest-links-output-kv.json --local
-```
-
-Xem [hướng dẫn đầy đủ](docs/invitation-links.md) về cấu hình prefix local/GitHub/Cloudflare, Excel/CSV, nhập KV và Worker preview.

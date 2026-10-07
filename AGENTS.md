@@ -50,25 +50,24 @@ npm run build
 
 - Chú rể: Chu Tiến Đạt.
 - Cô dâu: Nguyễn Huyền Dịu.
-- Tiệc mặc định: 10:00 ngày 31/10/2026, tức 22/09 năm Bính Ngọ âm lịch; token có thể chọn 17:00 ngày 30/10/2026 (21/09 âm lịch).
-- Lễ thành hôn: 13:30 ngày 31/10/2026, tức 22/09 năm Bính Ngọ âm lịch; phần này không đổi theo token.
+- Tiệc cưới: 10:00 ngày 30/10/2026, tức 21/09 năm Bính Ngọ âm lịch.
+- Lễ thành hôn: 14:00 ngày 31/10/2026, tức 22/09 năm Bính Ngọ âm lịch.
 - Thông tin hai gia đình, địa chỉ và tọa độ bản đồ nằm trong `src/data.js`.
 
 Khi thay đổi nội dung, hãy sửa nguồn dữ liệu trong `src/data.js` thay vì viết trực tiếp vào component. Không sao chép thông tin tài khoản ngân hàng sang tài liệu hoặc component khác.
 
 ## Cá nhân hóa tên khách
 
-Lời mời dùng mã ngẫu nhiên 32 ký tự hex trong query parameter `i`. Worker tra binding KV `INVITATIONS` để lấy tên, nhóm và lịch; không dùng JWT. `to` cũ bị bỏ qua.
+Tên khách được lấy từ query parameter `to`:
 
 ```text
-https://YOUR-WORKER/invite?i=<mã-32-ký-tự>
+https://datct269.github.io/wedding-invitation/?to=Nguyễn%20Văn%20An
 ```
 
-- Mã có 128 bit ngẫu nhiên, không chứa dữ liệu khách và không cần secret ký JWT. Quyền Cloudflare chỉ ở môi trường quản lý; không đưa vào JavaScript public hoặc Git. Không cung cấp API liệt kê/ghi KV công khai.
-- Token thiếu/sai hoặc Worker lỗi dùng `Quý khách`, Tiến Đạt – Huyền Dịu và 31/10/2026 10:00.
+- Chuẩn hóa bằng `URLSearchParams` và `trim()` trong `src/lib.js`.
+- Giá trị mặc định là `Quý khách` nếu thiếu, rỗng hoặc chỉ có khoảng trắng.
 - Hiển thị bằng text binding an toàn; không dùng `innerHTML` với dữ liệu do khách nhập.
-- Khi Worker trả tên đã xác minh, sổ lưu bút dùng cùng tên và khóa trường tên. Khi fallback, khách có thể nhập tên.
-- Tool XLSX/CSV và cấu hình môi trường xem `docs/invitation-links.md`, deploy xem `docs/production-deployment.md`; dữ liệu khách, batch KV và credential phải bị Git bỏ qua.
+- Khi URL có tên khách, sổ lưu bút dùng sẵn tên đó và khóa trường tên. Khi không có tên, khách có thể nhập tên.
 
 ## Quy tắc ảnh và tài nguyên
 
