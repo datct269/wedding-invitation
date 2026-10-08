@@ -16,13 +16,18 @@ export function mountGuestbook(scroll, context = resolveInvitation(window.locati
 
   function render() {
     const seen = new Set();
-    const items = [...submitted, ...rows].filter(row => { if (seen.has(row.id)) return false; seen.add(row.id); return true; });
+    const items = [...submitted, ...rows]
+      .filter(row => { if (seen.has(row.id)) return false; seen.add(row.id); return true; })
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime() || b.id.localeCompare(a.id));
     list.replaceChildren(...items.map(row => {
       const article = document.createElement('article'); article.className = 'message';
       const header = document.createElement('header'), author = document.createElement('strong'), date = document.createElement('time'), text = document.createElement('p');
       author.textContent = row.name;
       date.dateTime = row.date;
-      date.textContent = new Date(row.date).toLocaleDateString('vi-VN');
+      date.textContent = new Date(row.date).toLocaleString('vi-VN', {
+        timeZone: 'Asia/Ho_Chi_Minh', day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit', hour12: false
+      });
       text.textContent = row.message;
       header.append(author, date); article.append(header, text);
       return article;
