@@ -5,23 +5,28 @@ import { pathToFileURL } from 'node:url';
 import { renderInvitationHTML, requestURL, HTML_CACHE_CONTROL } from '../server/html.js';
 import { resolveInvitation } from '../src/invitation.js';
 import { renderPreview } from '../server/og.js';
+import guestbook from '../api/guestbook.js';
+import { config } from 'dotenv';
+
+config({ path: '.env.local', quiet: true });
 
 const root = process.cwd();
 const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.mp3': 'audio/mpeg', '.wav': 'audio/wav', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.ttf': 'font/ttf', '.woff2': 'font/woff2' };
 
-export function createInvitationServer() {
-  return http.createServer(handleRequest);
+export function createInvitationServer({ guestbookHandler = guestbook } = {}) {
+  return http.createServer((request, response) => handleRequest(request, response, guestbookHandler));
 }
 
-async function handleRequest(request, response) {
+async function handleRequest(request, response, guestbookHandler) {
   try {
+    const url = requestURL(request);
+    const pathname = decodeURIComponent(url.pathname).replace(/^\/wedding-invitation(?=\/|$)/, '') || '/';
+    if (pathname === '/api/guestbook') return await guestbookHandler(request, response);
     if (!['GET', 'HEAD'].includes(request.method)) {
       response.writeHead(405, { Allow: 'GET, HEAD' });
       response.end('Method not allowed');
       return;
     }
-    const url = requestURL(request);
-    const pathname = decodeURIComponent(url.pathname).replace(/^\/wedding-invitation(?=\/|$)/, '') || '/';
     let data;
     let type;
     let cache = 'no-cache';

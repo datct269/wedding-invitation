@@ -3,7 +3,6 @@ import assert from 'node:assert/strict';
 import {access,readFile} from 'node:fs/promises';
 import {calendarCells,escapeHTML,guestNameFromSearch,personalizedGuestName} from '../src/lib.js';
 import {invitationData as d} from '../src/data.js';
-import {guestbookStore} from '../src/guestbook-store.js';
 import {wrapIndex} from '../src/components/gallery.js';
 import {ReceptionInfo,WeddingCeremony} from '../src/components/sections.js';
 test('calendar starts Monday and handles leap years',()=>{assert.deepEqual(calendarCells('2026-04-07').cells.slice(0,4),[null,null,1,2]);assert.equal(calendarCells('2024-02-29').cells.filter(Boolean).length,29);});
@@ -31,4 +30,3 @@ test('social preview metadata is static and uses the GitHub Pages URL',async()=>
 });
 test('bride family address uses TP Bắc Ninh',()=>{assert.match(d.families[1].address,/TP Bắc Ninh$/);assert.doesNotMatch(d.families[1].address,/Tỉnh Bắc Ninh/);});
 test('all configured local media exists',async()=>{const paths=[d.hero.src,...d.gallery.flatMap(p=>[p.src,p.lightboxSrc,p.thumbnailSrc]),...Object.values(d.decorations),...d.gifts.map(g=>g.qrSrc),d.music.src];for(const path of paths)await access(path.startsWith('/')?'.'+path:path);});
-test('guestbook validates, persists and safely renders user text',async()=>{const memory=new Map([['romantic-invitation-guestbook-v1',JSON.stringify([{name:'Old',message:'Old wish',date:'2026-01-01'}])]]);globalThis.localStorage={getItem:k=>memory.get(k)||null,setItem:(k,v)=>memory.set(k,v),removeItem:k=>memory.delete(k)};await assert.rejects(()=>guestbookStore.add({name:' ',message:'hello'}));await guestbookStore.add({name:' Guest ',message:'<script>alert(1)</script>'});const rows=await guestbookStore.list();assert.equal(rows[0].name,'Guest');assert.equal(rows.length,1);assert.equal(memory.has('romantic-invitation-guestbook-v1'),false);assert.match(escapeHTML(rows[0].message),/^&lt;script&gt;/);memory.set('romantic-invitation-guestbook-v2','broken');assert.equal((await guestbookStore.list()).length,d.guestbookSeed.length);});

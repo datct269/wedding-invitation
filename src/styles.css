@@ -56,5 +56,9 @@
 
 .cover-time{font-size:16px;line-height:1.5;margin-top:3px;color:#765258}
 .guest-name{overflow-wrap:anywhere}
+.guestbook-list-status{font:12px/1.7 var(--sans);margin-top:12px;overflow-wrap:anywhere}
+.guestbook-actions{display:flex;justify-content:center;gap:10px;margin-top:12px}
+.guestbook-actions:has(button:not([hidden])){padding-bottom:4px}
+.message p{white-space:pre-wrap}
 @media(max-width:600px){.cover-time{font-size:14px}.cover-card{min-height:560px}}
 @media(max-height:650px) and (max-width:600px){.cover-card{min-height:0;padding-top:96px}.cover .invitation-message{margin-block:10px 16px}}

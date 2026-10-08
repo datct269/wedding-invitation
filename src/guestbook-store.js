@@ -1,8 +1,31 @@
-import {invitationData} from './data.js';
-const KEY='romantic-invitation-guestbook-v2';
-const clearLegacy=()=>{try{localStorage.removeItem('romantic-invitation-guestbook-v1');}catch{}};
-// Async adapter: replace these two methods with API calls when a backend is ready.
-export const guestbookStore={
-  async list(){clearLegacy();try {const rows=JSON.parse(localStorage.getItem(KEY)||'[]');return [...(Array.isArray(rows)?rows.filter(r=>typeof r.name==='string'&&typeof r.message==='string'&&typeof r.date==='string'):[]),...invitationData.guestbookSeed];}catch{return [...invitationData.guestbookSeed];}},
-  async add({name,message}){const entry={name:name.trim(),message:message.trim(),date:new Date().toISOString()};if(!entry.name||!entry.message)throw new Error('Vui lòng điền đầy đủ tên và lời chúc.');let rows=[];try{rows=JSON.parse(localStorage.getItem(KEY)||'[]');if(!Array.isArray(rows))rows=[];}catch{}try{localStorage.setItem(KEY,JSON.stringify([entry,...rows].slice(0,100)));}catch{throw new Error('Trình duyệt chưa cho phép lưu lời chúc. Vui lòng thử lại.');}return entry;}
-};
+import { invitationData } from './data.js';
+
+export function createGuestbookStore(fetcher = (...args) => fetch(...args), endpoint = invitationData.guestbook.endpoint) {
+  async function request(url, options) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12_000);
+    try {
+      const response = await fetcher(url, { ...options, signal: controller.signal, credentials: 'same-origin' });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Chưa thể kết nối sổ lưu bút. Vui lòng thử lại sau.');
+      return data;
+    } catch (error) {
+      if (error.name === 'AbortError' || error instanceof TypeError || error instanceof SyntaxError) throw new Error('Chưa thể kết nối sổ lưu bút. Vui lòng thử lại sau.');
+      throw error;
+    } finally { clearTimeout(timeout); }
+  }
+  return {
+    async list(cursor = null) {
+      const page = await request(endpoint + (cursor ? '?cursor=' + encodeURIComponent(cursor) : ''), { method: 'GET' });
+      if (!Array.isArray(page.items)) throw new Error('Chưa thể tải lời chúc. Vui lòng thử lại.');
+      return page;
+    },
+    async add({ name, message, requestId }) {
+      const data = await request(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, message, requestId }) });
+      return data.item;
+    }
+  };
+}
+
+// All visitors read and write the same server-side guestbook; no local fallback.
+export const guestbookStore = createGuestbookStore();

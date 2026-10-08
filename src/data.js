@@ -9,6 +9,7 @@ export const invitationData = {
   couple: { groom: 'Tiến Đạt', bride: 'Huyền Dịu', groomFull: 'Chu Tiến Đạt', brideFull: 'Nguyễn Huyền Dịu' },
   guestName: 'Quý khách',
   publicSiteURL: 'https://datct269.github.io/wedding-invitation/',
+  guestbook: { endpoint: '/api/guestbook', pageSize: 20 },
   event: {
     date: '2026-10-31',
     ceremonyDate: '2026-10-31', ceremonyWeekday: 'Thứ Bảy', ceremonyLunarDate: '22/09 năm Bính Ngọ', ceremonyTime: '13:30', ceremonyVenue: 'Tư gia',

@@ -63,6 +63,46 @@ GitHub Pages vẫn hoạt động dưới `/wedding-invitation/` với các đư
 
 - Giữ nguyên ảnh gốc trong `public/images/wedding/originals/`; giao diện dùng `optimized/`, lightbox dùng `lightbox/`, ảnh nhỏ dùng `thumbnails/`.
 - QR và nhạc đọc từ cấu hình; không chạy `scripts/create-assets.mjs` sau khi đã thay tài nguyên thật.
-- Sổ lưu bút lưu trên trình duyệt bằng `localStorage`, chưa có backend dùng chung.
+- Sổ lưu bút lưu chung trong Firestore qua API Vercel; cần cấu hình Firebase trước khi sử dụng.
 - Giữ luồng mở thiệp, nhạc, album, popup và tạm dừng tự cuộn khi tương tác; tôn trọng `prefers-reduced-motion`.
 - Không có trang quản trị, RSVP hoặc đếm ngược.
+
+## Sổ lưu bút dùng chung — Firebase Firestore Spark
+
+Giao diện gửi/đọc lời chúc qua `/api/guestbook`, không lưu vào `localStorage` và không báo thành công khi API lỗi. Lời chúc mới nhất đứng trước; mỗi trang tải 20 lời chúc, nút “Xem thêm” tải trang tiếp theo. Danh sách trên Vercel cache 60 giây, nên khách khác có thể thấy lời chúc mới sau khoảng một phút. Người gửi thấy ngay lời chúc vừa lưu.
+
+API giới hạn tên 80 ký tự, lời chúc 1000 ký tự và 10 lượt gửi/phút cho mỗi địa chỉ IP. Gửi lại cùng yêu cầu sau lỗi mạng không tạo lời chúc trùng. Tên trong URL chỉ là cá nhân hóa, không xác thực danh tính. SDK Firebase chỉ chạy phía máy chủ; bản sửa dependency `uuid` được ghim để dùng SDK tương thích Node.js 20 mà không giữ lỗi đã được công bố.
+
+### 1. Tạo Firebase miễn phí
+
+1. Vào https://console.firebase.google.com/, **Create a project**; ví dụ `wedding-dat-diu`. Có thể tắt Google Analytics. Giữ gói **Spark**, không cần nâng lên Blaze.
+2. Mở **Build → Firestore Database → Create database**. Dùng **Standard edition**, database **`(default)`**, **Production mode**; chọn **Singapore (`asia-southeast1`)**. Vị trí database không đổi được sau khi tạo.
+3. Trong tab **Rules**, dùng nội dung `firestore.rules` của repository và nhấn **Publish**. Rule chặn truy cập trực tiếp từ trình duyệt; API sử dụng Admin SDK nên vẫn đọc/ghi được. Không bật Test mode hay rule cho phép mọi người ghi trực tiếp.
+4. Mở **Project settings → Service accounts → Generate new private key**, tải file JSON về và giữ riêng. Không commit file hoặc gửi khóa qua chat.
+
+### 2. Cấu hình local
+
+Sau khi tải file JSON, chạy từ thư mục dự án (thay đường dẫn bên dưới):
+
+```powershell
+npm run configure:firebase -- "C:\Users\DELL\Downloads\your-service-account.json"
+npm run dev
+```
+
+Công cụ tạo `.env.local` đã được Git bỏ qua, không in khóa ra màn hình. Nếu server local đang chạy, dừng rồi khởi động lại để nạp cấu hình.
+
+Mở thiệp ở hai trình duyệt hoặc một cửa sổ thường và một cửa sổ ẩn danh. Gửi lời chúc ở cửa sổ thứ nhất, tải lại cửa sổ thứ hai; lời chúc phải xuất hiện ở cả hai. Kiểm tra collection `guestbook_messages` trong Firebase Console để xác nhận dữ liệu được lưu thật.
+
+### 3. Cấu hình Vercel
+
+Vào **Project → Settings → Environment Variables**, thêm ba biến cho môi trường Production (và Preview nếu cần thử):
+
+| Biến | Giá trị lấy từ file JSON đã tải |
+| --- | --- |
+| `FIREBASE_PROJECT_ID` | `project_id` |
+| `FIREBASE_CLIENT_EMAIL` | `client_email` |
+| `FIREBASE_PRIVATE_KEY` | `private_key`, gồm toàn bộ BEGIN/END PRIVATE KEY và các dòng khóa |
+
+Không đặt tiền tố `NEXT_PUBLIC_` hay đưa các giá trị này vào `src/data.js`. File `.env.example` chỉ là mẫu. Sau khi thêm/sửa biến môi trường, **Redeploy** rồi kiểm tra lại gửi/đọc lời chúc bằng hai trình duyệt trên URL công khai. Trước khi có cấu hình hợp lệ, API trả 503 và giao diện cho phép thử lại; các phần thiệp khác vẫn hoạt động.
+
+Firestore tự tạo `guestbook_messages` và `guestbook_rate_limits` khi gửi lời chúc đầu tiên. Query dùng index mặc định cho `createdAt`; không cần realtime listener, Cloud Functions Firebase, Storage hay database khác. Có thể xóa lời chúc không phù hợp trực tiếp trong Firebase Console. Các lời chúc thử nghiệm trước đây trong `localStorage` không tự được đăng lên cơ sở dữ liệu chung.

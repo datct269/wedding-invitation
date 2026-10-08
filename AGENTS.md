@@ -10,7 +10,7 @@ Website đang được xuất bản bằng GitHub Pages tại:
 
 ## Công nghệ và lệnh làm việc
 
-Dự án là website tĩnh, không dùng framework hoặc thư viện giao diện lớn. Mã nguồn dùng HTML, CSS và JavaScript ES modules; các script Node.js đảm nhiệm chạy local, kiểm tra và build.
+Dự án dùng HTML, CSS và JavaScript ES modules, không dùng framework hoặc thư viện giao diện lớn. Giao diện và tài nguyên là file tĩnh; Vercel Functions phục vụ metadata/preview động và API sổ lưu bút dùng Firebase Firestore. Các script Node.js đảm nhiệm chạy local, kiểm tra và build.
 
 Yêu cầu Node.js 20 trở lên.
 
@@ -38,7 +38,8 @@ npm run build
 - `src/components/gifts.js`: nút và popup quà mừng.
 - `src/components/controls.js`: điều khiển nhạc và tự động cuộn.
 - `src/components/overlay.js`: hành vi chung cho các lớp phủ/modal.
-- `src/guestbook-store.js`: lớp lưu lời chúc bằng `localStorage`, được thiết kế để có thể thay bằng API sau này.
+- `src/guestbook-store.js`: lớp gọi API sổ lưu bút dùng chung; không lưu lời chúc bằng `localStorage`.
+- `api/guestbook.js` và `server/guestbook*.js`: API và lớp lưu Firestore, gồm phân trang, chống gửi trùng và giới hạn gửi.
 - `src/scroll.js`: logic tự động cuộn và tạm dừng khi người dùng tương tác.
 - `src/lib.js`: tiện ích xử lý tên khách, escape nội dung, ảnh và lịch.
 - `public/images/wedding/`: ảnh cưới theo từng kích thước sử dụng.
@@ -93,7 +94,8 @@ https://datct269.github.io/wedding-invitation/?to=Nguyễn%20Văn%20An
 - Nhạc và tự động cuộn bắt đầu theo luồng mở thiệp hiện có.
 - Tự động cuộn phải tạm dừng khi mở lightbox, mở popup quà, nhập lời chúc hoặc thao tác album.
 - Album phải tiếp tục hỗ trợ autoplay, điều hướng thủ công, swipe trên mobile và bàn phím trong lightbox.
-- Sổ lưu bút hiện chỉ lưu trên trình duyệt; chưa có backend.
+- Sổ lưu bút lưu chung trên Firestore qua API Vercel/local; tải 20 lời chúc mỗi trang và cache danh sách 60 giây. Không báo thành công nếu lưu API lỗi.
+- Khóa Firebase chỉ được đặt trong `.env.local` hoặc biến môi trường Vercel; không đưa vào `src/`, `public/`, tài liệu hay Git.
 - Không thêm RSVP, đếm ngược, trang quản trị hoặc trình chỉnh sửa nếu chưa được yêu cầu.
 
 ## Quy tắc chỉnh sửa
