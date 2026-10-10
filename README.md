@@ -106,3 +106,15 @@ Vào **Project → Settings → Environment Variables**, thêm ba biến cho mô
 Không đặt tiền tố `NEXT_PUBLIC_` hay đưa các giá trị này vào `src/data.js`. File `.env.example` chỉ là mẫu. Sau khi thêm/sửa biến môi trường, **Redeploy** rồi kiểm tra lại gửi/đọc lời chúc bằng hai trình duyệt trên URL công khai. Trước khi có cấu hình hợp lệ, API trả 503 và giao diện cho phép thử lại; các phần thiệp khác vẫn hoạt động.
 
 Firestore tự tạo `guestbook_messages` và `guestbook_rate_limits` khi gửi lời chúc đầu tiên. Query dùng index mặc định cho `createdAt`; không cần realtime listener, Cloud Functions Firebase, Storage hay database khác. Có thể xóa lời chúc không phù hợp trực tiếp trong Firebase Console. Các lời chúc thử nghiệm trước đây trong `localStorage` không tự được đăng lên cơ sở dữ liệu chung.
+
+## Gửi thiệp khi Messenger không hiện ảnh preview
+
+Messenger quyết định cách hiển thị preview; Sharing Debugger đọc được ảnh không đảm bảo Messenger hiển thị ảnh. Có thể gửi trực tiếp ảnh thiệp cá nhân hóa cùng link, không cần scrape từng khách.
+
+Tạo một file JSON theo `scripts/invitation-guests.example.json`: mỗi khách có `to` (tên), `side` (`groom`/`bride`) và `slot` (`oct30`/`oct31`). Chạy:
+
+```bash
+npm run invitations:export -- scripts/invitation-guests.example.json https://wedding-invitation-dat-diu.vercel.app/
+```
+
+Mỗi lần chạy tạo thư mục riêng trong `invitation-exports/`, gồm ảnh PNG và file TXT chứa link tương ứng cho từng khách, cùng `links.json` tổng hợp. Ảnh dùng lại mẫu preview và dữ liệu cưới hiện có. Gửi ảnh dưới dạng ảnh trong Messenger rồi dán link từ file TXT; ảnh đính kèm không tự là link bấm được. Công cụ chỉ tạo file local, không gửi tin nhắn, không cần Firebase hoặc deploy. Danh sách khách và ảnh xuất được giữ local, không đưa lên Git; công cụ không sửa preview tự động của Messenger.

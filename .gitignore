@@ -8,3 +8,4 @@ node_modules/
 !.env.example
 *service-account*.json
 *firebase-adminsdk*.json
+invitation-exports/
